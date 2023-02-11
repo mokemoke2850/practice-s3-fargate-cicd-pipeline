@@ -50,4 +50,4 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Upload to S3
         run: |
-          aws s3 ./dist-files s3:${{ env.S3_BUCKET }}
+          aws s3 sync ./dist-files s3:${{ env.S3_BUCKET }}
