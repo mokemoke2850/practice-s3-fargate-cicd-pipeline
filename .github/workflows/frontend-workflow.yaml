@@ -1,0 +1,46 @@
+name: Deploy React App to S3
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "frontend/src/**"
+env:
+  AWS_REGION: "ap-northeast-1"
+defaults:
+  run:
+    working-directory: frontend
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Build React App
+        run: npm run build
+      - name: Save build to cache
+        uses: actions/cache@v2
+        with:
+          path: dist
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-build-
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload to S3
+        uses: aws-actions/aws-cli-deploy@v1
+        with:
+          args: s3 cp build s3://react-cicd-test-cjadiop/ --recursive
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
