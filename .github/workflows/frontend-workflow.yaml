@@ -26,21 +26,24 @@ jobs:
         run: npm ci
       - name: Build React App
         run: npm run build
-      - name: Save build to cache
-        uses: actions/cache@v2
+      - name: Upload Build files
+        uses: actions/upload-artifact@v3
         with:
+          name: dist-files
           path: dist
-          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-build-
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Download the artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
       - name: Upload to S3
         uses: aws-actions/aws-cli-deploy@v1
         with:
-          args: s3 cp build s3://${{ env.S3_BUCKET }}/ --recursive
+          args: s3 cp dist-files s3://${{ env.S3_BUCKET }}/ --recursive
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
