@@ -40,8 +40,6 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: dist-files
-      - name: echo ls
-        run: ls -l
       - name: Configure AWS credentials from account
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -52,4 +50,4 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - name: Upload to S3
         run: |
-          aws s3 sync ./dist-files s3://${{ env.S3_BUCKET }}
+          aws s3 sync . s3://${{ env.S3_BUCKET }}
