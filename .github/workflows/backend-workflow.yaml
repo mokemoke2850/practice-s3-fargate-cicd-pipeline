@@ -25,6 +25,7 @@ jobs:
       - name: Build Docker image
         working-directory: backend
         run: |
-          IMAGE_TAG=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
-          docker build -t ${{ env.ECR_URI }}:$IMAGE_TAG .
-          docker push ${{ env.ECR_URI }}:$IMAGE_TAG
+          docker build -t ${{ env.ECR_URI }}:latest .
+          docker push ${{ env.ECR_URI }}:latest
+      - name: Update ECS Service
+        uses: .github/workflows/backend-deploy-workflow.yaml
