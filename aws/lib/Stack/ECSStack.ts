@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecsp from 'aws-cdk-lib/aws-ecs-patterns';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 
 export class ECSStack extends cdk.Stack {
   public readonly ecsService: ecsp.ApplicationLoadBalancedFargateService;
@@ -60,5 +61,12 @@ export class ECSStack extends cdk.Stack {
         }),
       }
     );
+
+    // ALBのヘルスチェックURLパスを/ishealthyに変更する
+    this.ecsService.targetGroup.configureHealthCheck({
+      path: '/ishealthy',
+      port: '80',
+      protocol: elbv2.Protocol.HTTP,
+    });
   }
 }
