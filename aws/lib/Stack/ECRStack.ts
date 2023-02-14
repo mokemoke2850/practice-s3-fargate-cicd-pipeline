@@ -5,7 +5,7 @@ import path = require('path');
 import * as imagedeploy from 'cdk-docker-image-deployment';
 
 export class ECRStack extends cdk.Stack {
-  public readonly repository: ecr.Repository;
+  public readonly repository: ecr.IRepository;
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
