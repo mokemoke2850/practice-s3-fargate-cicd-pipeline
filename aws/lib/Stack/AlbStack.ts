@@ -33,7 +33,7 @@ export class AlbStack extends cdk.Stack {
       internetFacing: true,
       loadBalancerName: 'ecs-alb',
       vpcSubnets: vpc.selectSubnets({
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        subnetType: ec2.SubnetType.PUBLIC,
       }),
       securityGroup: albSecurityGroup,
     });
