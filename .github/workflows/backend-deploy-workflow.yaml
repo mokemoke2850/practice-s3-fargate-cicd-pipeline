@@ -2,7 +2,7 @@ name: Update ECR Task & Service
 on:
   workflow_run:
     workflows:
-      - ".github/workflows/backend-workflow.yaml"
+      - "Build & Push Backend Image"
     types:
       - "completed"
 env:
