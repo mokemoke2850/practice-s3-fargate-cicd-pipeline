@@ -38,12 +38,8 @@ export class ECSStack extends cdk.Stack {
         FRONTEND_URL: frontendURL,
         API_ENV: 'production',
         API_PORT: '80',
-      },
-      healthCheck: {
-        command: [
-          'CMD-SHELL',
-          'curl -f http://localhost:80/ishealthy || exit 1',
-        ],
+        CORS_PERMIT: '*', // For test
+        // CORS_PERMIT: alb.loadBalancerDnsName
       },
     });
 
