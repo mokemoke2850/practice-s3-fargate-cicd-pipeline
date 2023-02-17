@@ -1,0 +1,87 @@
+name: CI/CD pipeline
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-northeast-1
+  REPOSITORY_SIMULATION: simulation-repo
+  REPOSITORY_BACKEND: backend-repo
+  SIMULATION_CHANGED: # シミュレーションコード変更検知条件
+    ${{ contains(github.event.head_commit.modified, 'simulation/') ||
+    contains(github.event.head_commit.added, 'simulation/') ||
+    contains(github.event.head_commit.removed, 'simulation/') }}
+  BACKEND_CHANGED: # バックエンドコード変更検知条件
+    ${{ contains(github.event.head_commit.modified, 'backend/') ||
+    contains(github.event.head_commit.added, 'backend/') ||
+    contains(github.event.head_commit.removed, 'backend/') }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build SIMULATION Container Image
+        if: env.SIMULATION_CHANGED == 'true'
+        run: |
+          cd simulation
+          export REPOSITORY=${{ env.REPOSITORY_SIMULATION }}
+          docker build -t my-image-simulation .
+          docker tag my-image-simulation:latest $REPOSITORY:${{ env.GITHUB_SHA }}-simulation"
+
+      - name: Push SIMULATION Docker Image
+        if: env.SIMULATION_CHANGED == 'true'
+        run: |
+          cd simulation
+          docker push $REPOSITORY:${{ env.GITHUB_SHA }}-simulation
+
+      - name: Build Backend Container Image
+        if: env.BACKEND_CHANGED == 'true'
+        run: |
+          cd backend
+          export REPOSITORY=${{ env.REPOSITORY_BACKEND }}
+          docker build -t my-image-backend .
+          docker tag my-image-backend:latest $REPOSITORY:${{ env.GITHUB_SHA }}-backend
+
+      - name: Push Backend Docker Image
+        if: env.BACKEND_CHANGED == 'true'
+        run: |
+          cd backend
+          docker push $REPOSITORY:${{ env.GITHUB_SHA }}-backend
+
+      - name: Update ECS Task Definition
+        if: env.SIMULATION_CHANGED == 'true' or env.BACKEND_CHANGED == 'true'
+        uses: aws-actions/amazon-ecs-update-task-definition@v1
+        with:
+          task-definition: my-task-definition
+          container-definitions: |
+            [
+              {
+                "name": "my-container-simulation",
+                "image": "${{ env.REPOSITORY_SIMULATION }}:${{ env.GITHUB_SHA }}-simulation",
+                ]
+              },
+              {
+                "name": "my-container-backend",
+                "image": "${{ env.REPOSITORY_BACKEND }}:${{ env.GITHUB_SHA }}-backend",
+                "portMappings": [
+                  {
+                    "containerPort": 8080
+                  }
+                ]
+              }
+            ]
+          region: ${{ env.AWS_REGION }}
+      - name: Update ECS Service
+        if: env.SIMULATION_CHANGED == 'true' or env.BACKEND_CHANGED == 'true'
+        uses: aws-actions/amazon-ecs-update-service@v1
+        with:
+          service: my-service
+          task-definition: my-task-definition
+          region: ${{ env.AWS_REGION }}
