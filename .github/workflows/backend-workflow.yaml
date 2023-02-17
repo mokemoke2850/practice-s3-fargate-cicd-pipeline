@@ -18,6 +18,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.build-image.outputs.image }}
     steps:
       - name: Get Code
         uses: actions/checkout@v3
@@ -62,7 +64,7 @@ jobs:
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
+          image: ${{ needs.build.outputs.image }}
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
