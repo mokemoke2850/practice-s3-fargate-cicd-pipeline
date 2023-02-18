@@ -1,85 +1,89 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:284968725079:task-definition/AwsStackbackendapifargatetaskBC39D8E3:9",
-  "containerDefinitions": [
-    {
-      "name": "backend-api",
-      "image": "284968725079.dkr.ecr.ap-northeast-1.amazonaws.com/github-actions-test:latest",
-      "cpu": 0,
-      "links": [],
-      "portMappings": [
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:284968725079:task-definition/AwsStackbackendapifargatetaskBC39D8E3:17",
+    "containerDefinitions": [
         {
-          "containerPort": 80,
-          "hostPort": 80,
-          "protocol": "tcp"
+            "name": "backend-api",
+            "image": "284968725079.dkr.ecr.ap-northeast-1.amazonaws.com/github-actions-test:latest",
+            "cpu": 0,
+            "links": [],
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "entryPoint": [],
+            "command": [],
+            "environment": [
+                {
+                    "name": "API_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "CORS_PERMIT",
+                    "value": "*"
+                },
+                {
+                    "name": "API_PORT",
+                    "value": "80"
+                },
+                {
+                    "name": "FRONTEND_URL",
+                    "value": "https://d17v1zbryi9erd.cloudfront.net"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [],
+            "dnsServers": [],
+            "dnsSearchDomains": [],
+            "extraHosts": [],
+            "dockerSecurityOptions": [],
+            "dockerLabels": {},
+            "ulimits": [],
+            "systemControls": []
         }
-      ],
-      "essential": true,
-      "entryPoint": [],
-      "command": [],
-      "environment": [
+    ],
+    "family": "AwsStackbackendapifargatetaskBC39D8E3",
+    "taskRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskTaskRole968D5277-1MK9XD2UWTNL9",
+    "executionRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskExecutionRole7439462-OPMDVHI62SWS",
+    "networkMode": "awsvpc",
+    "revision": 17,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
         {
-          "name": "API_ENV",
-          "value": "production"
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
         },
         {
-          "name": "CORS_PERMIT",
-          "value": "*"
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
         },
         {
-          "name": "API_PORT",
-          "value": "80"
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
         },
         {
-          "name": "FRONTEND_URL",
-          "value": "http://react-cicd-test-cjadiop.s3.amazonaws.com"
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
         }
-      ],
-      "environmentFiles": [],
-      "mountPoints": [],
-      "volumesFrom": [],
-      "secrets": [],
-      "dnsServers": [],
-      "dnsSearchDomains": [],
-      "extraHosts": [],
-      "dockerSecurityOptions": [],
-      "dockerLabels": {},
-      "ulimits": [],
-      "systemControls": []
-    }
-  ],
-  "family": "AwsStackbackendapifargatetaskBC39D8E3",
-  "taskRoleArn": "",
-  "executionRoleArn": "arn:aws:iam::284968725079:role/ecsTaskExecutionRole",
-  "networkMode": "awsvpc",
-  "revision": 9,
-  "volumes": [],
-  "status": "ACTIVE",
-  "requiresAttributes": [
-    {
-      "name": "com.amazonaws.ecs.capability.ecr-auth"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.17"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.task-iam-role"
-    },
-    {
-      "name": "ecs.capability.execution-role-ecr-pull"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
-    },
-    {
-      "name": "ecs.capability.task-eni"
-    }
-  ],
-  "placementConstraints": [],
-  "compatibilities": ["EC2", "FARGATE"],
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
-  "registeredAt": "2023-02-17T14:22:05.467Z",
-  "registeredBy": "arn:aws:sts::284968725079:assumed-role/cdk-hnb659fds-cfn-exec-role-284968725079-ap-northeast-1/AWSCloudFormation",
-  "tags": []
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "registeredAt": "2023-02-18T12:50:37.502000+09:00",
+    "registeredBy": "arn:aws:sts::284968725079:assumed-role/cdk-hnb659fds-cfn-exec-role-284968725079-ap-northeast-1/AWSCloudFormation"
 }

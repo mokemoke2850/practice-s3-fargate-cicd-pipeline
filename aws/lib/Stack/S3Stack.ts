@@ -10,22 +10,22 @@ export class S3Stack extends cdk.Stack {
     super(scope, id, props);
 
     // フロントエンド用ファイル格納用 S3 バケット
-    this.bucket = new s3.Bucket(scope, 'frontend-s3-bucket', {
+    this.bucket = new s3.Bucket(this, 'frontend-s3-bucket', {
       bucketName: 'react-cicd-test-cjadiop',
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: '/index.html',
+      // websiteIndexDocument: 'index.html',
+      // websiteErrorDocument: '/index.html',
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
-    // バケットポリシー　これがないとサイト表示できない
-    const webSiteBucketPolicyStatement = new iam.PolicyStatement({
-      actions: ['s3:GetObject'],
-      effect: iam.Effect.ALLOW,
-      principals: [new iam.AnyPrincipal()],
-      resources: [`${this.bucket.bucketArn}/*`],
-    });
+    // バケットポリシー　これがないとサイト表示できない → CloudFront使用するのでいらない
+    // const webSiteBucketPolicyStatement = new iam.PolicyStatement({
+    //   actions: ['s3:GetObject'],
+    //   effect: iam.Effect.ALLOW,
+    //   principals: [new iam.AnyPrincipal()],
+    //   resources: [`${this.bucket.bucketArn}/*`],
+    // });
 
-    this.bucket.addToResourcePolicy(webSiteBucketPolicyStatement);
+    // this.bucket.addToResourcePolicy(webSiteBucketPolicyStatement);
   }
 }
