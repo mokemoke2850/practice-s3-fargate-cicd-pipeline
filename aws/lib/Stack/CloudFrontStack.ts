@@ -4,17 +4,18 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
+interface CloudFrontStackProps {
+  bucket: s3.Bucket;
+}
+
 export class CloudFrontStack extends cdk.Stack {
   public readonly cloudfront: cloudfront.CloudFrontWebDistribution;
   public readonly oai: cloudfront.OriginAccessIdentity;
   public readonly url: string;
-  constructor(
-    scope: Construct,
-    id: string,
-    bucket: s3.Bucket,
-    props?: cdk.StackProps
-  ) {
-    super(scope, id, props);
+  constructor(scope: Construct, id: string, props: CloudFrontStackProps) {
+    super(scope, id);
+
+    const { bucket } = props;
 
     this.oai = new cloudfront.OriginAccessIdentity(
       this,
