@@ -14,6 +14,6 @@ RUN apt-get update
 
 COPY --from=deploy-builder /app/app .
 
-EXPOSE 8000
+EXPOSE 50051
 
 CMD ["./app"]
