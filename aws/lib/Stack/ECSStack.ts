@@ -11,7 +11,8 @@ export class ECSStack extends cdk.Stack {
     id: string,
     vpc: cdk.aws_ec2.Vpc,
     alb: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer,
-    repository: cdk.aws_ecr.IRepository,
+    backendRepository: cdk.aws_ecr.IRepository,
+    simulationRepository: cdk.aws_ecr.IRepository,
     frontendURL: string,
     props?: cdk.StackProps
   ) {
@@ -32,14 +33,28 @@ export class ECSStack extends cdk.Stack {
     );
     taskDefinition.addContainer('backend-api-container', {
       containerName: 'backend-api',
-      image: ecs.ContainerImage.fromEcrRepository(repository, 'latest'),
+      image: ecs.ContainerImage.fromEcrRepository(backendRepository, 'latest'),
       portMappings: [{ containerPort: 80, hostPort: 80 }],
       environment: {
         FRONTEND_URL: frontendURL,
+        SIMULATION_URL: 'http://localhost:50051',
         API_ENV: 'production',
         API_PORT: '80',
         CORS_PERMIT: '*', // For test
         // CORS_PERMIT: alb.loadBalancerDnsName
+      },
+    });
+    taskDefinition.addContainer('simulation-api-container', {
+      containerName: 'simulation-api',
+      image: ecs.ContainerImage.fromEcrRepository(
+        simulationRepository,
+        'latest'
+      ),
+      environment: {
+        BACKEND_URL: 'localhost:80',
+        API_ENV: 'production',
+        API_PORT: '50051',
+        CORS_PERMIT: '*', // For test
       },
     });
 
