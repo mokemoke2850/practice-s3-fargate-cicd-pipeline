@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:284968725079:task-definition/AwsStackbackendapifargatetaskBC39D8E3:17",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:284968725079:task-definition/AwsStackbackendapifargatetaskBC39D8E3:23",
     "containerDefinitions": [
         {
             "name": "backend-api",
@@ -26,12 +26,55 @@
                     "value": "*"
                 },
                 {
+                    "name": "SIMULATION_URL",
+                    "value": "http://localhost:50051"
+                },
+                {
                     "name": "API_PORT",
                     "value": "80"
                 },
                 {
                     "name": "FRONTEND_URL",
-                    "value": "https://d17v1zbryi9erd.cloudfront.net"
+                    "value": "https://d1in8tg1qljmp1.cloudfront.net"
+                }
+            ],
+            "environmentFiles": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [],
+            "dnsServers": [],
+            "dnsSearchDomains": [],
+            "extraHosts": [],
+            "dockerSecurityOptions": [],
+            "dockerLabels": {},
+            "ulimits": [],
+            "systemControls": []
+        },
+        {
+            "name": "simulation-api",
+            "image": "284968725079.dkr.ecr.ap-northeast-1.amazonaws.com/github-actions-test-simulation:latest",
+            "cpu": 0,
+            "links": [],
+            "portMappings": [],
+            "essential": true,
+            "entryPoint": [],
+            "command": [],
+            "environment": [
+                {
+                    "name": "API_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "BACKEND_URL",
+                    "value": "localhost:80"
+                },
+                {
+                    "name": "CORS_PERMIT",
+                    "value": "*"
+                },
+                {
+                    "name": "API_PORT",
+                    "value": "50051"
                 }
             ],
             "environmentFiles": [],
@@ -48,10 +91,10 @@
         }
     ],
     "family": "AwsStackbackendapifargatetaskBC39D8E3",
-    "taskRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskTaskRole968D5277-1MK9XD2UWTNL9",
-    "executionRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskExecutionRole7439462-OPMDVHI62SWS",
+    "taskRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskTaskRole968D5277-BO02UKX4BU53",
+    "executionRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskExecutionRole7439462-1OL3VIJ8KDHMP",
     "networkMode": "awsvpc",
-    "revision": 17,
+    "revision": 23,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -84,6 +127,6 @@
     ],
     "cpu": "256",
     "memory": "512",
-    "registeredAt": "2023-02-18T12:50:37.502000+09:00",
+    "registeredAt": "2023-02-18T22:44:25.181000+09:00",
     "registeredBy": "arn:aws:sts::284968725079:assumed-role/cdk-hnb659fds-cfn-exec-role-284968725079-ap-northeast-1/AWSCloudFormation"
 }

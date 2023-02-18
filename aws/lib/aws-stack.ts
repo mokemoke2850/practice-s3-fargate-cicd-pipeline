@@ -29,7 +29,8 @@ export class AwsStack extends cdk.Stack {
       'ecs-fargate-stack',
       vpc.vpc,
       alb.alb,
-      repository.repository,
+      repository.backendRepository,
+      repository.simulationRepository,
       frontendURL,
       props
     );
