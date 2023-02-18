@@ -1,0 +1,19 @@
+version: '3'
+services:
+  api:
+    image: api:latest
+    container_name: backend_api
+    ports:
+      - 8000:8000
+    environment:
+      - FRONTEND_URL=http://localhost:5173
+      - API_ENV=local
+      - API_PORT=8000
+      - SIMULATION_URL=http://simulation:50051
+  simulation:
+    image: simulation:latest
+    container_name: simulation_api
+    environment:
+      - BACKEND_URL=localhost:8000
+      - API_ENV=local
+      - API_PORT=50051

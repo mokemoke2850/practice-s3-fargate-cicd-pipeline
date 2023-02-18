@@ -9,6 +9,7 @@ on:
 env:
   AWS_REGION: ap-northeast-1
   S3_BUCKET: react-cicd-test-cjadiop
+  VITE_BACKEND_URL: localhost:8000
 
 jobs:
   build:

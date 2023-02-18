@@ -1,0 +1,14 @@
+version: '3'
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: deploy
+    image: api:latest
+  simulation:
+    build:
+      context: ./simulation
+      dockerfile: Dockerfile
+      target: deploy
+    image: simulation:latest

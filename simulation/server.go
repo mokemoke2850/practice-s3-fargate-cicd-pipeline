@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 
 	"github.com/labstack/echo/v4"
@@ -14,9 +12,9 @@ import (
 func main() {
 	e := echo.New()
 
-	CORS_PERMIT := os.Getenv("FRONTEND_URL")
+	CORS_PERMIT := os.Getenv("BACKEND_URL")
 	if CORS_PERMIT == "" {
-		CORS_PERMIT = "http://localhost:5173"
+		CORS_PERMIT = "localhost:8000"
 	}
 
 	API_ENV := os.Getenv("API_ENV")
@@ -26,7 +24,7 @@ func main() {
 
 	API_PORT := os.Getenv("API_PORT")
 	if API_PORT == "" {
-		API_PORT = "8000"
+		API_PORT = "50051"
 	}
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -50,26 +48,8 @@ func registRoute(e *echo.Echo) {
 		return c.String(http.StatusOK, "ishealty")
 	})
 
-	e.GET("/title", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello From API")
-	})
-
 	e.GET("/simulation", func(c echo.Context) error {
-		SIMULATION_URL := os.Getenv("SIMULATION_URL")
-		if SIMULATION_URL == "" {
-			SIMULATION_URL = "localhost:50051"
-		}
-
-		req_url, _ := url.JoinPath(SIMULATION_URL, "simulation")
-
-		resp, err := http.Get(req_url)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, "error occured! in simulation")
-		}
-		defer resp.Body.Close()
-
-		byteArray, _ := ioutil.ReadAll(resp.Body)
-		return c.String(http.StatusOK, string(byteArray))
+		return c.String(http.StatusOK, "HelloWorld! From Simulation")
 	})
 
 }
