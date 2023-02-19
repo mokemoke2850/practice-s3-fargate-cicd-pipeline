@@ -20,3 +20,7 @@ aws cli を利用してイメージを削除してあげるしかなさそう...
 
 - `.env` ファイルの中に`VITE_`というプレフィックスで環境変数を設定する。
 - 環境変数を使用する場合には、`import.meta.env.VITE_**`で使用できる。
+
+### GithubActions と Aws CDK の組み合わせ
+
+- AwsCdk で作成された `task-definition.json` のタスク実行ロール名が自動生成されるので、GithubActions の実行ユーザのロールにうまくアタッチできない
