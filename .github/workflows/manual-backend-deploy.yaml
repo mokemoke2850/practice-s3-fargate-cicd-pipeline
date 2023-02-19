@@ -1,9 +1,6 @@
-name: CI/CD pipeline
+name: Manual Backend Deploy
 
 on:
-  # push:
-  #   branches:
-  #     - main
   workflow_dispatch:
 
 env:
@@ -13,14 +10,6 @@ env:
   ECS_CLUSTER: github-actions-test-cluster
   ECS_SERVICE: github-actions-test-service
   TASK_DIFINTION: ./aws/task-definition.json
-  SIMULATION_CHANGED: # シミュレーションコード変更検知条件
-    ${{ contains(github.event.head_commit.modified, 'simulation/') ||
-    contains(github.event.head_commit.added, 'simulation/') ||
-    contains(github.event.head_commit.removed, 'simulation/') }}
-  BACKEND_CHANGED: # バックエンドコード変更検知条件
-    ${{ contains(github.event.head_commit.modified, 'backend/') ||
-    contains(github.event.head_commit.added, 'backend/') ||
-    contains(github.event.head_commit.removed, 'backend/') }}
 
 jobs:
   deploy:
@@ -31,7 +20,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build SIMULATION Container Image
-        if: env.SIMULATION_CHANGED == 'true'
         run: |
           cd simulation
           export REPOSITORY=${{ env.REPOSITORY_SIMULATION }}
@@ -39,13 +27,11 @@ jobs:
           docker tag my-image-simulation:latest $REPOSITORY:${{ env.GITHUB_SHA }}-simulation"
 
       - name: Push SIMULATION Docker Image
-        if: env.SIMULATION_CHANGED == 'true'
         run: |
           cd simulation
           docker push $REPOSITORY:${{ env.GITHUB_SHA }}-simulation
 
       - name: Build Backend Container Image
-        if: env.BACKEND_CHANGED == 'true'
         run: |
           cd backend
           export REPOSITORY=${{ env.REPOSITORY_BACKEND }}
@@ -53,10 +39,10 @@ jobs:
           docker tag my-image-backend:latest $REPOSITORY:${{ env.GITHUB_SHA }}-backend
 
       - name: Push Backend Docker Image
-        if: env.BACKEND_CHANGED == 'true'
         run: |
           cd backend
           docker push $REPOSITORY:${{ env.GITHUB_SHA }}-backend
+
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -66,7 +52,6 @@ jobs:
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Update ECS Task Definition
-        if: env.SIMULATION_CHANGED == 'true' or env.BACKEND_CHANGED == 'true'
         uses: aws-actions/amazon-ecs-update-task-definition@v1
         id: task-def
         with:
@@ -91,8 +76,8 @@ jobs:
               }
             ]
           region: ${{ env.AWS_REGION }}
+
       - name: Update ECS Service
-        if: env.SIMULATION_CHANGED == 'true' or env.BACKEND_CHANGED == 'true'
         uses: aws-actions/amazon-ecs-update-service@v1
         with:
           service: ${{ env.ECS_SERVICE }}
