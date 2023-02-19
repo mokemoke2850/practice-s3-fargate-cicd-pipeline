@@ -3,20 +3,22 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecsp from 'aws-cdk-lib/aws-ecs-patterns';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 
+interface ECSStackProps {
+  vpc: cdk.aws_ec2.Vpc;
+  alb: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer;
+  backendRepository: cdk.aws_ecr.IRepository;
+  simulationRepository: cdk.aws_ecr.IRepository;
+  frontendURL: string;
+}
+
 export class ECSStack extends cdk.Stack {
   public readonly ecsService: ecsp.ApplicationLoadBalancedFargateService;
 
-  constructor(
-    scope: cdk.Stack,
-    id: string,
-    vpc: cdk.aws_ec2.Vpc,
-    alb: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer,
-    backendRepository: cdk.aws_ecr.IRepository,
-    simulationRepository: cdk.aws_ecr.IRepository,
-    frontendURL: string,
-    props?: cdk.StackProps
-  ) {
-    super(scope, id, props);
+  constructor(scope: cdk.Stack, id: string, props: ECSStackProps) {
+    super(scope, id);
+
+    const { vpc, alb, backendRepository, simulationRepository, frontendURL } =
+      props;
 
     const ecsCluster = new ecs.Cluster(scope, 'backend-api-ecs-cluster', {
       clusterName: 'github-actions-test-cluster',

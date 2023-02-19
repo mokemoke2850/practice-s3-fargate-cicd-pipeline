@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:284968725079:task-definition/AwsStackbackendapifargatetaskBC39D8E3:23",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:284968725079:task-definition/AwsStackbackendapifargatetaskBC39D8E3:24",
     "containerDefinitions": [
         {
             "name": "backend-api",
@@ -35,7 +35,7 @@
                 },
                 {
                     "name": "FRONTEND_URL",
-                    "value": "https://d1in8tg1qljmp1.cloudfront.net"
+                    "value": "https://df03bjewcgbff.cloudfront.net"
                 }
             ],
             "environmentFiles": [],
@@ -91,10 +91,10 @@
         }
     ],
     "family": "AwsStackbackendapifargatetaskBC39D8E3",
-    "taskRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskTaskRole968D5277-BO02UKX4BU53",
-    "executionRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskExecutionRole7439462-1OL3VIJ8KDHMP",
+    "taskRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskTaskRole968D5277-2MEKDF4ENAPL",
+    "executionRoleArn": "arn:aws:iam::284968725079:role/AwsStack-backendapifargatetaskExecutionRole7439462-EP9LET9HHAR2",
     "networkMode": "awsvpc",
-    "revision": 23,
+    "revision": 24,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -127,6 +127,6 @@
     ],
     "cpu": "256",
     "memory": "512",
-    "registeredAt": "2023-02-18T22:44:25.181000+09:00",
+    "registeredAt": "2023-02-19T21:37:40.297000+09:00",
     "registeredBy": "arn:aws:sts::284968725079:assumed-role/cdk-hnb659fds-cfn-exec-role-284968725079-ap-northeast-1/AWSCloudFormation"
 }
