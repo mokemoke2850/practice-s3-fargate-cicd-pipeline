@@ -16,32 +16,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Get Code
+        uses: actions/checkout@v3
 
-      - name: Build SIMULATION Container Image
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build And Push SIMULATION Container Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd simulation
-          export REPOSITORY=${{ env.REPOSITORY_SIMULATION }}
-          docker build -t my-image-simulation .
-          docker tag my-image-simulation:latest $REPOSITORY:${{ env.GITHUB_SHA }}-simulation"
+          docker build -t $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Push SIMULATION Docker Image
-        run: |
-          cd simulation
-          docker push $REPOSITORY:${{ env.GITHUB_SHA }}-simulation
-
-      - name: Build Backend Container Image
+      - name: Build And Push Backend Container Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd backend
-          export REPOSITORY=${{ env.REPOSITORY_BACKEND }}
-          docker build -t my-image-backend .
-          docker tag my-image-backend:latest $REPOSITORY:${{ env.GITHUB_SHA }}-backend
-
-      - name: Push Backend Docker Image
-        run: |
-          cd backend
-          docker push $REPOSITORY:${{ env.GITHUB_SHA }}-backend
+          docker build -t $ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Update ECS Task Definition
         id: task-def
