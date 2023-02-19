@@ -43,19 +43,12 @@ jobs:
           cd backend
           docker push $REPOSITORY:${{ env.GITHUB_SHA }}-backend
 
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
       - name: Update ECS Task Definition
         uses: aws-actions/amazon-ecs-update-task-definition@v1
         id: task-def
         with:
           task-definition: ${{ env.TASK_DIFINTION }}
+          region: ${{ env.AWS_REGION }}
           container-definitions: |
             [
               {
@@ -75,7 +68,6 @@ jobs:
                 ]
               }
             ]
-          region: ${{ env.AWS_REGION }}
 
       - name: Update ECS Service
         uses: aws-actions/amazon-ecs-update-service@v1
