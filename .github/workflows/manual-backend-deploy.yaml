@@ -5,8 +5,8 @@ on:
 
 env:
   AWS_REGION: ap-northeast-1
-  REPOSITORY_SIMULATION: simulation-repo
-  REPOSITORY_BACKEND: backend-repo
+  REPOSITORY_SIMULATION: github-actions-test-simulation
+  REPOSITORY_BACKEND: github-actions-test
   ECS_CLUSTER: github-actions-test-cluster
   ECS_SERVICE: github-actions-test-service
   TASK_DIFINTION: ./aws/task-definition.json
