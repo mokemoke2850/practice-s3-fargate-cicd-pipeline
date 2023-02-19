@@ -7,6 +7,8 @@ env:
   AWS_REGION: ap-northeast-1
   REPOSITORY_SIMULATION: github-actions-test-simulation
   REPOSITORY_BACKEND: github-actions-test
+  SIMULATION_CONTAINER_NAME: simulation-api
+  BACKEND_CONTAINER_NAME: backend-api
   ECS_CLUSTER: github-actions-test-cluster
   ECS_SERVICE: github-actions-test-service
   TASK_DIFINTION: ./aws/task-definition.json
@@ -30,17 +32,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build And Push SIMULATION Container Image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          cd simulation
-          docker build -t $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
       - name: Build And Push Backend Container Image
+        id: backend-image-build
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -50,36 +43,37 @@ jobs:
           docker push $ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Update ECS Task Definition
-        id: task-def
+      - name: Build And Push SIMULATION Container Image
+        id: simulation-image-build
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd simulation
+          docker build -t $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update ECS Task Definition With Backend Container
+        id: render-backend-container
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.TASK_DIFINTION }}
-          region: ${{ env.AWS_REGION }}
-          container-definitions: |
-            [
-              {
-                "name": "simulation-api",
-                "image": "${{ env.REPOSITORY_SIMULATION }}:${{ env.GITHUB_SHA }}-simulation",
-                ]
-              },
-              {
-                "name": "backend-api",
-                "image": "${{ env.REPOSITORY_BACKEND }}:${{ env.GITHUB_SHA }}-backend",
-                "portMappings": [
-                  {
-                    "containerPort": 80,
-                    "hostPort": 80,
-                    "protocol": "tcp"
-                  }
-                ]
-              }
-            ]
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.simulation-image-build.outputs.image }}
+
+      - name: Update ECS Task Definition With Simulation Container
+        id: render-simulation-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-backend-container.outputs.task-definition }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.simulation-image-build.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          task-definition: ${{ steps.render-simulation-container.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
