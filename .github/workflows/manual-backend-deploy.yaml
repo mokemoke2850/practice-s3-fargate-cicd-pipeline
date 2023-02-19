@@ -59,7 +59,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.TASK_DIFINTION }}
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: ${{ env.BACKEND_CONTAINER_NAME }}
           image: ${{ steps.simulation-image-build.outputs.image }}
 
       - name: Update ECS Task Definition With Simulation Container
@@ -67,7 +67,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.render-backend-container.outputs.task-definition }}
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: ${{ env.SIMULATION_CONTAINER_NAME }}
           image: ${{ steps.simulation-image-build.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
