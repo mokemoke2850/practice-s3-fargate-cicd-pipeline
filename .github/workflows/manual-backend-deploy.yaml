@@ -44,8 +44,8 @@ jobs:
           docker push $REPOSITORY:${{ env.GITHUB_SHA }}-backend
 
       - name: Update ECS Task Definition
-        uses: aws-actions/amazon-ecs-update-task-definition@v1
         id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.TASK_DIFINTION }}
           region: ${{ env.AWS_REGION }}
