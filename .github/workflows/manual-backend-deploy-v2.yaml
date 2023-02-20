@@ -1,0 +1,109 @@
+name: Manual Backend Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "backend/**"
+      - "simulation/**"
+
+env:
+  AWS_REGION: ap-northeast-1
+  REPOSITORY_SIMULATION: github-actions-test-simulation
+  REPOSITORY_BACKEND: github-actions-test
+  SIMULATION_CONTAINER_NAME: simulation-api
+  BACKEND_CONTAINER_NAME: backend-api
+  ECS_CLUSTER: github-actions-test-cluster
+  ECS_SERVICE: github-actions-test-service
+  TASK_DIFINTION: ./aws/task-definition.json
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Checks if Backend And Simulation Has Been Changed
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            simulation:
+              - 'simulation/**'
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build And Push Backend Container Image
+        id: backend-image-build
+        if: ${{ steps.filter.outputs.backend == 'true' }}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Get Backend Image Tag
+        id: backend-image-build
+        if: ${{ steps.filter.outputs.backend == 'false' }}
+        run: |
+          echo "image=$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_BACKEND }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
+
+      - name: Build And Push SIMULATION Container Image
+        id: simulation-image-build
+        if: ${{ steps.filter.outputs.simulation == 'true' }}
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd simulation
+          docker build -t $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Get Simulation Image Tag
+        id: simulation-image-build
+        if: ${{ steps.filter.outputs.backend == 'false' }}
+        run: |
+          echo "image=$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_SIMULATION }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
+
+      - name: Update ECS Task Definition With Backend Container
+        id: render-backend-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.TASK_DIFINTION }}
+          container-name: ${{ env.BACKEND_CONTAINER_NAME }}
+          image: ${{ steps.simulation-image-build.outputs.image }}
+
+      - name: Update ECS Task Definition With Simulation Container
+        id: render-simulation-container
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-backend-container.outputs.task-definition }}
+          container-name: ${{ env.SIMULATION_CONTAINER_NAME }}
+          image: ${{ steps.simulation-image-build.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.render-simulation-container.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
