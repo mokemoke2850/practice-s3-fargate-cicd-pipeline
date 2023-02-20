@@ -64,7 +64,7 @@ jobs:
         id: backend-image-fetch
         if: ${{ steps.filter.outputs.backend == 'false' }}
         run: |
-          echo "image=$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_BACKEND }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_BACKEND }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
 
       - name: Build And Push SIMULATION Container Image
         id: simulation-image-build
@@ -82,7 +82,7 @@ jobs:
         id: simulation-image-fetch
         if: ${{ steps.filter.outputs.backend == 'false' }}
         run: |
-          echo "image=$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_SIMULATION }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_SIMULATION }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
 
       - name: Update ECS Task Definition With Backend Container
         id: render-backend-container
