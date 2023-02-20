@@ -1,4 +1,4 @@
-name: Manual Backend Deploy
+name: Manual Backend Deploy Version2
 
 on:
   workflow_dispatch:
@@ -61,7 +61,7 @@ jobs:
           echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_BACKEND }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Get Backend Image Tag
-        id: backend-image-build
+        id: backend-image-fetch
         if: ${{ steps.filter.outputs.backend == 'false' }}
         run: |
           echo "image=$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_BACKEND }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
@@ -79,7 +79,7 @@ jobs:
           echo "image=$ECR_REGISTRY/${{ env.REPOSITORY_SIMULATION }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Get Simulation Image Tag
-        id: simulation-image-build
+        id: simulation-image-fetch
         if: ${{ steps.filter.outputs.backend == 'false' }}
         run: |
           echo "image=$(aws ecr describe-images --repository-name ${{ env.REPOSITORY_SIMULATION }} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]')" >> $GITHUB_OUTPUT
@@ -90,7 +90,7 @@ jobs:
         with:
           task-definition: ${{ env.TASK_DIFINTION }}
           container-name: ${{ env.BACKEND_CONTAINER_NAME }}
-          image: ${{ steps.simulation-image-build.outputs.image }}
+          image: ${{ (steps.backend-image-build.outcome == 'success' && steps.backend-image-build.outputs.image) || steps.backend-image-fetch.outputs.image }}
 
       - name: Update ECS Task Definition With Simulation Container
         id: render-simulation-container
@@ -98,7 +98,7 @@ jobs:
         with:
           task-definition: ${{ steps.render-backend-container.outputs.task-definition }}
           container-name: ${{ env.SIMULATION_CONTAINER_NAME }}
-          image: ${{ steps.simulation-image-build.outputs.image }}
+          image: ${{ (steps.simulation-image-build.outcome == 'success' && steps.simulation-image-build.outputs.image) || steps.simulation-image-fetch.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
