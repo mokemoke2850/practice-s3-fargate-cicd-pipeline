@@ -121,4 +121,4 @@ jobs:
       - name: Show Warning Message If Not Running Task
         if: ${{ steps.conut-running-tasks.outputs.tasks-count == 0 }}
         run: |
-          echo "::warning Not Running Task. Launch Task Manually"
+          echo "::warning::Not Running Task. Launch Task Manually"
