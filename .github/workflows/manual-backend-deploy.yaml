@@ -56,6 +56,8 @@ jobs:
 
       - name: Update ECS Task Definition With Backend Container
         id: render-backend-container
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.TASK_DIFINTION }}
@@ -64,6 +66,8 @@ jobs:
 
       - name: Update ECS Task Definition With Simulation Container
         id: render-simulation-container
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.render-backend-container.outputs.task-definition }}
