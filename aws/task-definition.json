@@ -92,7 +92,7 @@
   ],
   "family": "AwsStackbackendapifargatetaskBC39D8E3",
   "taskRoleArn": "",
-  "executionRoleArn": "arn:aws:iam::284968725079:role/ecsTaskExecuteRole",
+  "executionRoleArn": "arn:aws:iam::284968725079:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "revision": 26,
   "volumes": [],
