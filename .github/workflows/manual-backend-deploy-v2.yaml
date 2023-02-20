@@ -106,8 +106,19 @@ jobs:
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        timeout-minutes: 5
         with:
           task-definition: ${{ steps.render-simulation-container.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Count Running Tasks
+        id: conut-running-tasks
+        run: |
+          echo "tasks-count=$(aws describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} --query 'services[0].runningCount')"
+
+      - name: Show Warning Message If Not Running Task
+        if: ${{ steps.conut-running-tasks.outputs.tasks-count == 0 }}
+        run: |
+          echo "::warning Not Running Task. Launch Task Manually"
