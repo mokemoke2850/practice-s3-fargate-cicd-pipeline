@@ -49,7 +49,7 @@ func registRoute(e *echo.Echo) {
 	})
 
 	e.GET("/simulation", func(c echo.Context) error {
-		return c.String(http.StatusOK, "HelloWorld! From Simulation. Updated 2nd")
+		return c.String(http.StatusOK, "HelloWorld! From Simulation. Updated")
 	})
 
 }
